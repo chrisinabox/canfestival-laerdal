@@ -1,4 +1,5 @@
-#include <linux/module.h>
+// Does not seem to be needed
+//#include <linux/module.h>
 #include "data.h"
 #include "can_driver.h"
 #include "dcf.h"
