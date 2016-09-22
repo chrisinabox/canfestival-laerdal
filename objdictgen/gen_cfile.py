@@ -183,11 +183,12 @@ def GenerateFileContent(Node, headerfilepath, pointers_dict = {}):
     pointedVariableContent = ""
     strDeclareHeader = ""
     indexContents = {}
+    HeaderobjectdefinitionContent= ""
     for index in listIndex:
         texts["index"] = index
         strIndex = ""
         entry_infos = Node.GetEntryInfos(index)
-	params_infos = Node.GetParamsEntry(index)
+        params_infos = Node.GetParamsEntry(index)
         texts["EntryName"] = entry_infos["name"].encode('ascii','replace')
         values = Node.GetEntry(index)
         if index in variablelist:
@@ -280,17 +281,17 @@ def GenerateFileContent(Node, headerfilepath, pointers_dict = {}):
                 # Entry type is RECORD
                 for subIndex, value in enumerate(values):
                     texts["subIndex"] = subIndex
-		    params_infos = Node.GetParamsEntry(index,subIndex)
+                    params_infos = Node.GetParamsEntry(index,subIndex)
                     if subIndex > 0:
                         subentry_infos = Node.GetSubentryInfos(index, subIndex)
                         typename = GetTypeName(Node, subentry_infos["type"])
                         typeinfos = GetValidTypeInfos(typename, [values[subIndex]])
                         texts["subIndexType"] = typeinfos[0]
                         if typeinfos[1] is not None:
-                            if params_infos["buffer_size"] != "": 
-			          texts["suffixe"] = "[%s]"%params_infos["buffer_size"]
-		            else:
-			       texts["suffixe"] = "[%d]"%typeinfos[1]
+                            if params_infos["buffer_size"] != "":
+                                texts["suffixe"] = "[%s]"%params_infos["buffer_size"]
+                            else:
+                                texts["suffixe"] = "[%d]"%typeinfos[1]
                         else:
                             texts["suffixe"] = ""
                         texts["value"], texts["comment"] = ComputeValue(typeinfos[2], value)
@@ -300,12 +301,13 @@ def GenerateFileContent(Node, headerfilepath, pointers_dict = {}):
                             mappedVariableContent += "%(subIndexType)s %(parent)s_%(name)s%(suffixe)s = %(value)s;\t\t/* Mapped at index 0x%(index)04X, subindex 0x%(subIndex)02X */\n"%texts
                         else:
                             strIndex += "                    %(subIndexType)s %(NodeName)s_obj%(index)04X_%(name)s%(suffixe)s = %(value)s;%(comment)s\n"%texts
-        
+        HeaderobjectdefinitionContent += "\n#define " + re.sub(r"[^\w]","_",texts["NodeName"]) + "_" + re.sub(r"[^\w]","_",texts["EntryName"]) + "_Idx " + str(format(texts["index"],"#04x")) + "\n"
+
         # Generating Dictionary C++ entry
         strIndex += "                    subindex %(NodeName)s_Index%(index)04X[] = \n                     {\n"%texts
         for subIndex in xrange(len(values)):
             subentry_infos = Node.GetSubentryInfos(index, subIndex)
-	    params_infos = Node.GetParamsEntry(index,subIndex)
+            params_infos = Node.GetParamsEntry(index,subIndex)
             if subIndex < len(values) - 1:
                 sep = ","
             else:
@@ -336,9 +338,9 @@ def GenerateFileContent(Node, headerfilepath, pointers_dict = {}):
                     name = "%s_obj%04X_%s"%(texts["NodeName"], texts["index"], FormatName(subentry_infos["name"]))
             if typeinfos[2] == "visible_string":
                 if params_infos["buffer_size"] != "":
-		  sizeof = params_infos["buffer_size"]
-		else:
-                  sizeof = str(max(len(values[subIndex]), default_string_size))
+                    sizeof = params_infos["buffer_size"]
+                else:
+                    sizeof = str(max(len(values[subIndex]), default_string_size))
             elif typeinfos[2] == "domain":
                 sizeof = str(len(values[subIndex]))
             else:
@@ -352,6 +354,11 @@ def GenerateFileContent(Node, headerfilepath, pointers_dict = {}):
             pointer_name = pointers_dict.get((index, subIndex), None)
             if pointer_name is not None:
                 pointedVariableContent += "%s* %s = &%s;\n"%(typeinfos[0], pointer_name, name)
+            HeaderobjectdefinitionContent += "#define " + re.sub(r"[^\w]","_",texts["NodeName"]) + "_" + re.sub(r"[^\w]","_",texts["EntryName"]) + "_" + re.sub(r"[^\w]","_",subentry_infos["name"]) + "_sIdx " + str(format(subIndex,"#04x"))
+            if ("" != params_infos["comment"]):
+                HeaderobjectdefinitionContent += "    /* " + params_infos["comment"] + " */\n"
+            else:
+                HeaderobjectdefinitionContent += "\n"
         strIndex += "                     };\n"
         indexContents[index] = strIndex
         
@@ -583,8 +590,28 @@ extern CO_Data %(NodeName)s_Data;
     HeaderFileContent += strDeclareHeader
     
     HeaderFileContent += "\n#endif // %(file_include_name)s\n"%texts
-    
-    return fileContent,HeaderFileContent
+
+#-------------------------------------------------------------------------------
+#                          Write Header Object Defintions Content
+#-------------------------------------------------------------------------------
+    texts["file_include_objdef_name"] = headerfilepath.replace(".", "_OBJECTDEFINES_").upper()
+    HeaderobjectdefinitionContent = generated_tag + """
+#ifndef %(file_include_objdef_name)s
+#define %(file_include_objdef_name)s
+
+/*
+    Object defines naming convention:
+    General:
+        * All characters in object names that does not match [a-zA-Z0-9_] will be replaced by '_'.
+        * Case of object dictionary names will be kept as is.
+    Index : Node object dictionary name +_+ index name +_+ Idx 
+    SubIndex : Node object dictionary name +_+ index name +_+ subIndex name +_+ sIdx 
+*/
+"""%texts + HeaderobjectdefinitionContent + """
+#endif /* %(file_include_objdef_name)s */
+"""%texts
+
+    return fileContent,HeaderFileContent,HeaderobjectdefinitionContent
 
 #-------------------------------------------------------------------------------
 #                             Main Function
@@ -593,9 +620,11 @@ extern CO_Data %(NodeName)s_Data;
 def GenerateFile(filepath, node, pointers_dict = {}):
     try:
         headerfilepath = os.path.splitext(filepath)[0]+".h"
-        content, header = GenerateFileContent(node, os.path.split(headerfilepath)[1], pointers_dict)
+        objectdefinitionheaderpath = os.path.splitext(filepath)[0]+"_objectdefines.h"
+        content, header, headerObjectDefinition = GenerateFileContent(node, os.path.split(headerfilepath)[1], pointers_dict)
         WriteFile(filepath, content)
         WriteFile(headerfilepath, header)
+        WriteFile(objectdefinitionheaderpath, headerObjectDefinition)
         return None
     except ValueError, message:
         return _("Unable to Generate C File\n%s")%message
