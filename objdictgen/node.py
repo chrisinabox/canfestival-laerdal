@@ -1117,6 +1117,11 @@ class Node:
             list = self.GetMapVariableList()
             for index, subIndex, size, name in list:
                 if mapname == self.GenerateMapName(name, index, subIndex):
+                    if self.IsStringType(self.UserMapping[index]["values"][subIndex]["type"]):
+                        if self.ParamsDictionary[index][subIndex]["buffer_size"] != "":
+                            return (index << 16) + (subIndex << 8) + size*int(self.ParamsDictionary[index][subIndex]["buffer_size"])
+                        else:
+                            return (index << 16) + (subIndex << 8) + size*self.GetDefaultStringSize()
                     return (index << 16) + (subIndex << 8) + size
             return None
     
