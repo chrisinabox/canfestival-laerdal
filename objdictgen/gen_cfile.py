@@ -305,6 +305,7 @@ def GenerateFileContent(Node, headerfilepath, pointers_dict = {}):
 
         # Generating Dictionary C++ entry
         strIndex += "                    subindex %(NodeName)s_Index%(index)04X[] = \n                     {\n"%texts
+        generateSubIndexArrayComment = True
         for subIndex in xrange(len(values)):
             subentry_infos = Node.GetSubentryInfos(index, subIndex)
             params_infos = Node.GetParamsEntry(index,subIndex)
@@ -354,11 +355,16 @@ def GenerateFileContent(Node, headerfilepath, pointers_dict = {}):
             pointer_name = pointers_dict.get((index, subIndex), None)
             if pointer_name is not None:
                 pointedVariableContent += "%s* %s = &%s;\n"%(typeinfos[0], pointer_name, name)
-            HeaderobjectdefinitionContent += "#define " + re.sub(r"[^\w]","_",texts["NodeName"]) + "_" + re.sub(r"[^\w]","_",texts["EntryName"]) + "_" + re.sub(r"[^\w]","_",subentry_infos["name"]) + "_sIdx " + str(format(subIndex,"#04x"))
-            if ("" != params_infos["comment"]):
-                HeaderobjectdefinitionContent += "    /* " + params_infos["comment"] + " */\n"
-            else:
-                HeaderobjectdefinitionContent += "\n"
+            if not (entry_infos["struct"] & OD_IdenticalSubindexes):
+                generateSubIndexArrayComment = True
+                HeaderobjectdefinitionContent += "#define " + re.sub(r"[^\w]","_",texts["NodeName"]) + "_" + re.sub(r"[^\w]","_",texts["EntryName"]) + "_" + re.sub(r"[^\w]","_",subentry_infos["name"]) + "_sIdx " + str(format(subIndex,"#04x"))
+                if ("" != params_infos["comment"]):
+                    HeaderobjectdefinitionContent += "    /* " + params_infos["comment"] + " */\n"
+                else:
+                    HeaderobjectdefinitionContent += "\n"
+            elif generateSubIndexArrayComment:
+                generateSubIndexArrayComment = False
+                HeaderobjectdefinitionContent += "/* subindex define not generated for array objects */\n"
         strIndex += "                     };\n"
         indexContents[index] = strIndex
         
