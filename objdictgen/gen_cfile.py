@@ -451,7 +451,7 @@ def GenerateFileContent(Node, headerfilepath, pointers_dict = {}):
     for i, index in enumerate(listIndex):
         texts["index"] = index
         strDeclareIndex += "  { (subindex*)%(NodeName)s_Index%(index)04X,sizeof(%(NodeName)s_Index%(index)04X)/sizeof(%(NodeName)s_Index%(index)04X[0]), 0x%(index)04X},\n"%texts
-        strDeclareSwitch += "		case 0x%04X: i = %d;break;\n"%(index, i)
+        strDeclareSwitch += "       case 0x%04X: i = %d;break;\n"%(index, i)
         for cat, idx_min, idx_max in categories:
             if idx_min <= index <= idx_max:
                 quick_index["lastIndex"][cat] = i
@@ -538,17 +538,17 @@ const indextable %(NodeName)s_objdict[] =
 
 const indextable * %(NodeName)s_scanIndexOD (CO_Data *d, UNS16 wIndex, UNS32 * errorCode)
 {
-	(void)d;
-	int i;
-	switch(wIndex){
+    int i;
+    (void)d; /* unused parameter */
+    switch(wIndex){
 """%texts
     fileContent += strDeclareSwitch
-    fileContent += """		default:
-			*errorCode = OD_NO_SUCH_OBJECT;
-			return NULL;
-	}
-	*errorCode = OD_SUCCESSFUL;
-	return &%(NodeName)s_objdict[i];
+    fileContent += """       default:
+            *errorCode = OD_NO_SUCH_OBJECT;
+            return NULL;
+    }
+    *errorCode = OD_SUCCESSFUL;
+    return &%(NodeName)s_objdict[i];
 }
 
 /* 
