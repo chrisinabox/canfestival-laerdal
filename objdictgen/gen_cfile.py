@@ -364,6 +364,8 @@ def GenerateFileContent(Node, headerfilepath, pointers_dict = {}):
                     HeaderobjectdefinitionContent += "\n"
             elif generateSubIndexArrayComment:
                 generateSubIndexArrayComment = False
+                # Generate Number_of_Entries_sIdx define and write comment about not generating defines for the rest of the array objects
+                HeaderobjectdefinitionContent += "#define " + re.sub(r"[^\w]","_",texts["NodeName"]) + "_" + re.sub(r"[^\w]","_",texts["EntryName"]) + "_" + re.sub(r"[^\w]","_",subentry_infos["name"]) + "_sIdx " + str(format(subIndex,"#04x")) + "\n"
                 HeaderobjectdefinitionContent += "/* subindex define not generated for array objects */\n"
         strIndex += "                     };\n"
         indexContents[index] = strIndex
