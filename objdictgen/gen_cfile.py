@@ -101,7 +101,7 @@ def ComputeValue(type, value):
 
 def WriteFile(filepath, content):
     cfile = open(filepath,"w")
-    cfile.write(content)
+    cfile.write(content.encode('utf-8'))
     cfile.close()
 
 def GetTypeName(Node, typenumber):
@@ -636,4 +636,3 @@ def GenerateFile(filepath, node, pointers_dict = {}):
         return None
     except ValueError, message:
         return _("Unable to Generate C File\n%s")%message
-
