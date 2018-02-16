@@ -29,53 +29,59 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *  are in the object dictionary for definition purpose only. a device does not
  *  to support all of this datatypes.
  */
-#define boolean         0x01
-#define int8            0x02
-#define int16           0x03
-#define int32           0x04
-#define uint8           0x05
-#define uint16          0x06
-#define uint32          0x07
-#define real32          0x08
-#define visible_string  0x09
-#define octet_string    0x0A
-#define unicode_string  0x0B
-#define time_of_day     0x0C
-#define time_difference 0x0D
+enum ds301_obj_types
+{
+    boolean         = 0x01,
+    int8            = 0x02,
+    int16           = 0x03,
+    int32           = 0x04,
+    uint8           = 0x05,
+    uint16          = 0x06,
+    uint32          = 0x07,
+    real32          = 0x08,
+    visible_string  = 0x09,
+    octet_string    = 0x0A,
+    unicode_string  = 0x0B,
+    time_of_day     = 0x0C,
+    time_difference = 0x0D,
 
-#define domain          0x0F
-#define int24           0x10
-#define real64          0x11
-#define int40           0x12
-#define int48           0x13
-#define int56           0x14
-#define int64           0x15
-#define uint24          0x16
+    domain          = 0x0F,
+    int24           = 0x10,
+    real64          = 0x11,
+    int40           = 0x12,
+    int48           = 0x13,
+    int56           = 0x14,
+    int64           = 0x15,
+    uint24          = 0x16,
 
-#define uint40          0x18
-#define uint48          0x19
-#define uint56          0x1A
-#define uint64          0x1B
+    uint40          = 0x18,
+    uint48          = 0x19,
+    uint56          = 0x1A,
+    uint64          = 0x1B,
 
-#define pdo_communication_parameter 0x20
-#define pdo_mapping                 0x21
-#define sdo_parameter               0x22
-#define identity                    0x23
+    pdo_communication_parameter = 0x20,
+    pdo_mapping                 = 0x21,
+    sdo_parameter               = 0x22,
+    identity                    = 0x23,
 
 /* CanFestival is using 0x24 to 0xFF to define some types containing a 
  value range (See how it works in objdict.c)
  */
+};
 
 
 /** Each entry of the object dictionary can be READONLY (RO), READ/WRITE (RW),
  *  WRITE-ONLY (WO)
  */
-#define RW     0x00  
-#define WO     0x01
-#define RO     0x02
+enum ds301_obj_access
+{
+    RW     = 0x00,
+    WO     = 0x01,
+    RO     = 0x02,
 
-#define TO_BE_SAVE  0x04
-#define DCF_TO_SEND 0x08
+    TO_BE_SAVE  = 0x04,
+    DCF_TO_SEND = 0x08,
+};
 
 /************************ STRUCTURES ****************************/
 /** This are some structs which are neccessary for creating the entries

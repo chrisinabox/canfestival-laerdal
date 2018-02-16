@@ -61,8 +61,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /* Misc constants */
 /* -------------- */
 /* Should not be modified */
-#define Rx 0
-#define Tx 1
+/*#define Rx 0 */
+/*#define Tx 1 */
 #ifndef TRUE
 #define TRUE  1
 #endif
@@ -131,21 +131,24 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
    ---------------
   defined in the canopen DS301 
 */
-#define NMT	   0x0
-#define SYNC       0x1
-#define TIME_STAMP 0x2
-#define PDO1tx     0x3
-#define PDO1rx     0x4
-#define PDO2tx     0x5
-#define PDO2rx     0x6
-#define PDO3tx     0x7
-#define PDO3rx     0x8
-#define PDO4tx     0x9
-#define PDO4rx     0xA
-#define SDOtx      0xB
-#define SDOrx      0xC
-#define NODE_GUARD 0xE
-#define LSS 	   0xF
+enum ds301_function_codes
+{
+    NMT	       = 0x0,
+    SYNC       = 0x1,
+    TIME_STAMP = 0x2,
+    PDO1tx     = 0x3,
+    PDO1rx     = 0x4,
+    PDO2tx     = 0x5,
+    PDO2rx     = 0x6,
+    PDO3tx     = 0x7,
+    PDO3rx     = 0x8,
+    PDO4tx     = 0x9,
+    PDO4rx     = 0xA,
+    SDOtx      = 0xB,
+    SDOrx      = 0xC,
+    NODE_GUARD = 0xE,
+    LSS        = 0xF,
+};
 
 /* NMT Command Specifier, sent by master to change a slave state */
 /* ------------------------------------------------------------- */
@@ -166,17 +169,20 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /* constantes used in the different state machines */
 /* ----------------------------------------------- */
 /* Must not be modified */
-#define state1  0x01
-#define state2  0x02
-#define state3  0x03
-#define state4  0x04
-#define state5  0x05
-#define state6  0x06
-#define state7  0x07
-#define state8  0x08
-#define state9  0x09
-#define state10 0x0A
-#define state11 0x0B
+enum pdo_states
+{
+    state1  = 0x01,
+    state2  = 0x02,
+    state3  = 0x03,
+    state4  = 0x04,
+    state5  = 0x05,
+    state6  = 0x06,
+    state7  = 0x07,
+    state8  = 0x08,
+    state9  = 0x09,
+    state10 = 0x0A,
+    state11 = 0x0B,
+};
 
 #endif /* __def_h__ */
 
