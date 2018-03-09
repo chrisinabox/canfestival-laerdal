@@ -30,13 +30,23 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  * @ingroup can
  */
 typedef struct {
+#ifdef CANLIB_USE_EXT_FRAME
+  UNS32 cob_id;	/**< message's ID which support extended frame format */
+  UNS8 res0;		/**< padding */
+  UNS8 res1;		/**< padding */
+#else
   UNS16 cob_id;	/**< message's ID */
+#endif
   UNS8 rtr;		/**< remote transmission request. (0 if not rtr message, 1 if rtr message) */
   UNS8 len;		/**< message's length (0 to 8) */
   UNS8 data[8]; /**< message's datas */
 } Message;
 
+#ifdef CANLIB_USE_EXT_FRAME
+#define Message_Initializer {0,0,0,0,0,{0,0,0,0,0,0,0,0}}
+#else
 #define Message_Initializer {0,0,0,{0,0,0,0,0,0,0,0}}
+#endif
 
 typedef UNS8 (*canSend_t)(Message *);
 

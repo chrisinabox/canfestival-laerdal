@@ -17,9 +17,9 @@
 
 #else
 
-#define UNS16_LE(v)  (v)
+#define UNS16_LE(v)  ((UNS16)(v))
 
-#define UNS32_LE(v)  (v)
+#define UNS32_LE(v)  ((UNS32)(v))
 
 #endif
 
