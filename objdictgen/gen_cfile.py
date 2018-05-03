@@ -96,8 +96,11 @@ def ComputeValue(type, value):
         return "\"%s\""%''.join(["\\x%2.2x"%ord(char) for char in value]), ""
     elif type.startswith("real"):
         return "%f"%value, ""
-    else:
-        return "0x%X"%value, "\t/* %s */"%str(value)
+    else: # value is integer; make sure to handle negative numbers correctly
+        if value < 0:
+            return "-0x%X"%(-value), "\t/* %s */"%str(value)
+        else:
+            return "0x%X"%value, "\t/* %s */"%str(value)
 
 def WriteFile(filepath, content):
     cfile = open(filepath,"w")
@@ -212,17 +215,11 @@ def GenerateFileContent(Node, headerfilepath, pointers_dict = {}):
                     texts["suffixe"] = "[%d]"%typeinfos[1]
             else:
                 texts["suffixe"] = ""
-            if values<0 :
-                texts["value"], texts["comment"] = ComputeValue(typeinfos[2], -values)
-            else:
-                texts["value"], texts["comment"] = ComputeValue(typeinfos[2], values)
+            texts["value"], texts["comment"] = ComputeValue(typeinfos[2], values)
             if index in variablelist:
                 texts["name"] = UnDigitName(FormatName(subentry_infos["name"]))
                 strDeclareHeader += "extern %(subIndexType)s %(name)s%(suffixe)s;\t\t/* Mapped at index 0x%(index)04X, subindex 0x00*/\n"%texts
-                if values>=0 :
-                    mappedVariableContent += "%(subIndexType)s %(name)s%(suffixe)s = %(value)s;\t\t/* Mapped at index 0x%(index)04X, subindex 0x00 */\n"%texts
-                else:
-                    mappedVariableContent += "%(subIndexType)s %(name)s%(suffixe)s = -%(value)s;\t\t/* Mapped at index 0x%(index)04X, subindex 0x00 */\n"%texts
+                mappedVariableContent += "%(subIndexType)s %(name)s%(suffixe)s = %(value)s;\t\t/* Mapped at index 0x%(index)04X, subindex 0x00 */\n"%texts
             else:
                 strIndex += "                    %(subIndexType)s %(NodeName)s_obj%(index)04X%(suffixe)s = %(value)s;%(comment)s\n"%texts
             values = [values]
