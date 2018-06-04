@@ -80,7 +80,11 @@ canReceive_driver (CAN_HANDLE fd0, Message * m)
       return 1;
     }
 
-  m->cob_id = frame.can_id & CAN_EFF_MASK;
+  if (frame.can_id & CAN_EFF_FLAG)
+  {
+    return 1; // CANFestival does not handle extended id
+  }
+  m->cob_id = frame.can_id & CAN_SFF_MASK;
   m->len = frame.can_dlc;
   if (frame.can_id & CAN_RTR_FLAG)
     m->rtr = 1;
@@ -105,7 +109,7 @@ canSend_driver (CAN_HANDLE fd0, Message const * m)
 
   frame.can_id = m->cob_id;
   if (frame.can_id >= 0x800)
-    frame.can_id |= CAN_EFF_FLAG;
+    return 1; //Canopen should not produce EFF messages
   frame.can_dlc = m->len;
   if (m->rtr)
     frame.can_id |= CAN_RTR_FLAG;
@@ -234,6 +238,19 @@ canOpen_driver (s_BOARD * board)
       fprintf (stderr, "Binding failed: %s\n", strerror (CAN_ERRNO (err)));
       goto error_close;
     }
+
+  struct can_filter receive_filter[1];
+
+  //filter to receive only SFF messages
+  receive_filter[0].can_id   = 0; // Discard EFF messages
+  receive_filter[0].can_mask = CAN_EFF_FLAG;
+  err = CAN_SETSOCKOPT(*(int *)fd0, SOL_CAN_RAW, CAN_RAW_FILTER,
+            &receive_filter, sizeof(receive_filter));
+  if (err)
+  {
+    fprintf(stderr, "setsockopt filter failed: %s\n", strerror (CAN_ERRNO (err)));
+    goto error_close;
+  }
 
 #ifdef RTCAN_SOCKET
   baudrate = (can_baudrate_t *) & ifr.ifr_ifru;
