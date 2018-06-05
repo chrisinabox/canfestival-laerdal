@@ -85,6 +85,7 @@ CC2=cc
 
 # Install prefix
 SUB_PREFIX=
+SUB_TARGET_PREFIX=
 
 # Used for C compiler test/detection
 CFLAGS=
@@ -115,6 +116,7 @@ while [ $# -ge 1 ]; do
 	--os=*)		SUB_OS_NAME=$optarg;;
 	--kerneldir=*)	SUB_KERNELDIR=$optarg;;
 	--prefix=*)	SUB_PREFIX=$optarg;;
+	--target_prefix=*) SUB_TARGET_PREFIX=$optarg;;
 	--target=*)	SUB_TARGET=$optarg;;
 	--can=*)	SUB_CAN_DRIVER=$optarg;;
 	--timers=*)	SUB_TIMERS_DRIVER=$optarg;;
@@ -154,6 +156,7 @@ while [ $# -ge 1 ]; do
 		echo 	" --os=foo      Use operative system 'foo' instead of trying to autodetect."
 		echo 	" --kerneldir=foo   Use 'foo' as kernel source directory instead of default"
 		echo 	" --prefix=foo  Use prefix 'foo' instead of default ${SUB_PREFIX}."
+		echo    " --target_prefix=foo Use 'foo' as target destination prefix instead of default ${SUB_TARGET_PREFIX}."
 		echo 	" --target=foo  Use 'foo' as build target."
 		echo	"               \"unix\" for unix-like systems (Linux, Cygwin)"
 		echo	"               \"win32\" for win32 systems (native, mingw or VC++)"
@@ -673,6 +676,12 @@ fi
 
 echo "Using prefix: ${SUB_PREFIX}"
 
+if [ "$SUB_TARGET_PREFIX" = "" ]; then
+	SUB_TARGET_PREFIX=${SUB_PREFIX}
+fi
+
+echo "Using target prefix: ${SUB_TARGET_PREFIX}"
+
 ###########################################################################
 #                           GUESS DEPENDENCIES                            #
 ###########################################################################
@@ -947,6 +956,7 @@ for makefile_in in $MAKEFILES; do
 	s:SUB_EXE_CFLAGS:${SUB_EXE_CFLAGS}:
 	s:SUB_KERNELDIR:${SUB_KERNELDIR}:
 	s:SUB_PREFIX:${SUB_PREFIX}:
+	s:SUB_TARGET_PREFIX:${SUB_TARGET_PREFIX}:
 	s:SUB_OS_NAME:${SUB_OS_NAME}:
 	s:SUB_ARCH_NAME:${SUB_ARCH_NAME}:
 	s:SUB_OPT_CFLAGS:${SUB_OPT_CFLAGS}:

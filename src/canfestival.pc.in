@@ -1,4 +1,4 @@
-prefix=SUB_PREFIX
+prefix=SUB_TARGET_PREFIX
 libdir=${prefix}/lib
 includedir=${prefix}/include
 
