@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdlib.h>
 
 #include <sys/time.h>
@@ -114,6 +115,10 @@ void CreateReceiveTask(CAN_PORT port, TASK_HANDLE* Thread, void* ReceiveLoopPtr)
     unixtimer_ReceiveLoop_task_proc = ReceiveLoopPtr;
 	if(pthread_create(Thread, NULL, unixtimer_canReceiveLoop, (void*)port)) {
 		perror("pthread_create()");
+	}
+	if (pthread_setname_np(*Thread, "canfestival_thread"))
+	{
+		perror("pthread_setname_np()");
 	}
 }
 
