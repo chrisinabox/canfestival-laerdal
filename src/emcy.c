@@ -78,9 +78,15 @@ UNS32 OnNumberOfErrorsUpdate(CO_Data* d, const indextable * unsused_indextable, 
 **/
 void emergencyInit(CO_Data* d)
 {
-  RegisterSetODentryCallBack(d, 0x1003, 0x00, &OnNumberOfErrorsUpdate);
-
-  *d->error_number = 0;
+    UNS8 index;
+    RegisterSetODentryCallBack(d, 0x1003, 0x00, &OnNumberOfErrorsUpdate);
+    for (index = 0; index < EMCY_MAX_ERRORS; ++index)
+    {
+        d->error_data[index].active = 0;
+    }
+    *(d->error_register) = 0;
+    *(d->error_number) = 0;
+    d->error_state = Error_free;
 }
 
 /*!
