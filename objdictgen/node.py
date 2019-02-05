@@ -1117,11 +1117,24 @@ class Node:
             list = self.GetMapVariableList()
             for index, subIndex, size, name in list:
                 if mapname == self.GenerateMapName(name, index, subIndex):
-                    if self.IsStringType(self.UserMapping[index]["values"][subIndex]["type"]):
-                        if self.ParamsDictionary[index][subIndex]["buffer_size"] != "":
-                            return (index << 16) + (subIndex << 8) + size*int(self.ParamsDictionary[index][subIndex]["buffer_size"])
-                        else:
-                            return (index << 16) + (subIndex << 8) + size*self.GetDefaultStringSize()
+                    if self.UserMapping[index]["struct"] == 7: # array type, only look at subindex 1 in UserMapping
+                        if self.IsStringType(self.UserMapping[index]["values"][1]["type"]):
+                            try:
+                                if int(self.ParamsDictionary[index][subIndex]["buffer_size"]) <= 8:
+                                    return (index << 16) + (subIndex << 8) + size*int(self.ParamsDictionary[index][subIndex]["buffer_size"])
+                                else:
+                                    return None # String size is too big to fit in a PDO
+                            except KeyError:
+                                return None # No string length found and default string size is too big to fit in a PDO
+                    else:
+                        if self.IsStringType(self.UserMapping[index]["values"][subIndex]["type"]):
+                            try:
+                                if int(self.ParamsDictionary[index][subIndex]["buffer_size"]) <= 8:
+                                    return (index << 16) + (subIndex << 8) + size*int(self.ParamsDictionary[index][subIndex]["buffer_size"])
+                                else:
+                                    return None # String size is too big to fit in a PDO
+                            except KeyError:
+                                return None # No string length found and default string size is too big to fit in a PDO
                     return (index << 16) + (subIndex << 8) + size
             return None
     
