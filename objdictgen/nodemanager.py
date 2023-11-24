@@ -407,7 +407,7 @@ class NodeManager:
         else:
             nbmin = 1
         # Entry is a record, or is an array of manufacturer specific
-        if infos["struct"] & OD_IdenticalSubindexes or 0x2000 <= index <= 0x5FFF and infos["struct"] & OD_IdenticalSubindexes:
+        if infos["struct"] & OD_IdenticalSubindexes or 0x2000 <= index <= 0x5FFF and infos["struct"] & OD_MultipleSubindexes:
             for i in xrange(min(number, length - nbmin)):
                 self.RemoveCurrentVariable(index, length - i)
             self.BufferCurrentNode()
