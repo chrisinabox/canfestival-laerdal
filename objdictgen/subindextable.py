@@ -762,7 +762,7 @@ class EditingPanel(wx.SplitterWindow):
                         self.PopupMenu(self.IndexListMenu)
                     elif 0x2000 <= index <= 0x5FFF:
                         self.IndexListMenu.FindItemByPosition(0).Enable(True)
-                        self.IndexListMenu.FindItemByPosition(1).Enable(False)
+                        self.IndexListMenu.FindItemByPosition(1).Enable(True)
                         self.PopupMenu(self.IndexListMenu)
                     elif index >= 0x6000:
                         self.IndexListMenu.FindItemByPosition(0).Enable(False)
@@ -876,6 +876,24 @@ class EditingPanel(wx.SplitterWindow):
                         self.Manager.SetCurrentUserType(index, type, min, max, length)
                         self.ParentWindow.RefreshBufferState()
                         self.RefreshIndexList()
+                elif self.Manager.IsCurrentEntry(index) and 0x2000 <= index <= 0x5FFF:
+                    infos = self.Manager.GetEntryInfos(index)
+                    dialog = wx.TextEntryDialog(self, _("Choose a new index for %s(0x%04X)")%(infos["name"], index),
+                                 _("Move an index"), "0x%04X" % index, wx.OK|wx.CANCEL)
+                    if dialog.ShowModal() == wx.ID_OK:
+                        new_index = 0x0000
+                        try:
+                            new_index = int(dialog.GetValue(), 16)
+                        except:
+                            self.ShowErrorMessage("Index is invalid")
+                        if 0x2000 <= new_index <= 0x5FFF:
+                            self.Manager.SetCurrentEntryIndex(index, new_index)
+                            self.ParentWindow.RefreshBufferState()
+                            self.RefreshIndexList()
+                        else:
+                            self.ShowErrorMessage("Index out of range")
+                    dialog.Destroy()
+
         
     def OnDeleteIndexMenu(self, event):
         if self.Editable:
@@ -902,9 +920,7 @@ class EditingPanel(wx.SplitterWindow):
                             self.ParentWindow.RefreshBufferState()
                             self.RefreshIndexList()
                         except:
-                            message = wx.MessageDialog(self, _("An integer is required!"), _("ERROR"), wx.OK|wx.ICON_ERROR)
-                            message.ShowModal()
-                            message.Destroy()
+                            self.ShowErrorMessage("An integer is required!")
                     dialog.Destroy()
         
     def OnDeleteSubindexMenu(self, event):
@@ -922,9 +938,7 @@ class EditingPanel(wx.SplitterWindow):
                             self.ParentWindow.RefreshBufferState()
                             self.RefreshIndexList()
                         except:
-                            message = wx.MessageDialog(self, _("An integer is required!"), _("ERROR"), wx.OK|wx.ICON_ERROR)
-                            message.ShowModal()
-                            message.Destroy()
+                            self.ShowErrorMessage("An integer is required!")
                     dialog.Destroy()
         
     def OnDefaultValueSubindexMenu(self, event):
@@ -937,3 +951,8 @@ class EditingPanel(wx.SplitterWindow):
                     self.Manager.SetCurrentEntryToDefault(index, row)
                     self.ParentWindow.RefreshBufferState()
                     self.RefreshIndexList()
+
+    def ShowErrorMessage(self, message):
+        message = wx.MessageDialog(self, message, _("Error"), wx.OK|wx.ICON_ERROR)
+        message.ShowModal()
+        message.Destroy()

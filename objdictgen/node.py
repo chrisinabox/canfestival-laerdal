@@ -821,6 +821,17 @@ class Node:
                 return True
         return False
     
+
+    """
+    Warning ! Modifies an existing entry in the User Mapping Dictionary. Can't add a new one.
+    """
+    def SetMappingEntryIndex(self, index, newIndex):
+        if index in self.Dictionary and newIndex not in self.Dictionary:
+            self.Dictionary[newIndex] = self.Dictionary.pop(index)
+            self.UserMapping[newIndex] = self.UserMapping.pop(index)
+            return True
+        return False
+
     """
     Removes an existing entry in the User Mapping Dictionary. If a subIndex is specified
     it will remove this subIndex only if it's the last of the index. If no subIndex

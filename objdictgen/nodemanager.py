@@ -760,6 +760,10 @@ class NodeManager:
         self.CurrentNode.SetMappingEntry(index, name=name)
         self.BufferCurrentNode()
 
+    def SetCurrentEntryIndex(self, index, newIndex):
+        self.CurrentNode.SetMappingEntryIndex(index, newIndex)
+        self.BufferCurrentNode()
+
     def SetCurrentUserType(self, index, type, min, max, length):
         customisabletypes = self.GetCustomisableTypes()
         values, valuetype = self.GetCustomisedTypeValues(index)
